@@ -14,6 +14,8 @@ public class Logger{
 	public static final int DEBUG = 0;
 	public static final int INFO = 1;
 	public static final int ERROR = 2;
+	public static final int CONSOLE = 3;
+	public static final int HELP = 4;
 
 	public static void log(int level, String msg){
 		String prefix = "INFO";
@@ -26,6 +28,12 @@ public class Logger{
 				break;
 			case ERROR:
 				prefix = "ERROR";
+				break;
+			case CONSOLE:
+				prefix = "CONSOLE";
+				break;
+			case HELP:
+				prefix = "HELP";
 				break;
 		}
 		if(level >= Logger.LOGLEVEL){
