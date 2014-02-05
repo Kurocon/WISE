@@ -1,8 +1,11 @@
 package wise.server;
 
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.XMLConfiguration;
 import wise.Logger;
 import wise.network.InputHandler;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -19,7 +22,8 @@ public class Server implements Runnable{
 	private Thread thread;
 	private ServerInfo serverInfo;
 	private ServerSocket socket;
-	private HashMap<String, int[]> consoleCommands = new HashMap<String, int[]>();
+    private WhatsAppInfo waInfo = new WhatsAppInfo();
+    private HashMap<String, int[]> consoleCommands = new HashMap<String, int[]>();
 	private boolean finished = false;
 	private ArrayList<ClientHandler> connectedClients = new ArrayList<ClientHandler>();
 
@@ -39,14 +43,31 @@ public class Server implements Runnable{
 
 		addConsoleCommand("help", new int[]{0});
 
-		thread = new Thread(this);
+        Logger.log(Logger.INFO, "Loading configuration...");
+        this.loadConfig();
+
+        thread = new Thread(this);
 		thread.start();
 	}
 
-	private void addConsoleCommand(String cmd, int[] args){
+    public void loadConfig() {
+        File settingsFile = new File("settings.xml");
+        if (!settingsFile.exists()) {
+            XMLConfiguration configCreate = new XMLConfiguration();
+            configCreate.setFileName("settings.xml");
+            configCreate.addProperty("owner_phone", "31681872855");
+            try {
+                configCreate.save();
+            } catch (ConfigurationException e) {
+                Logger.log(Logger.ERROR, "Could not create configuration file [" + e.getMessage() + "]");
+            }
+        }
+    }
+
+    private void addConsoleCommand(String cmd, int[] args){
 		if(!this.consoleCommands.containsKey(cmd)){
-			// Command not yet added for these argument counts
-			this.consoleCommands.put(cmd, args);
+            // Command not yet added
+            this.consoleCommands.put(cmd, args);
 		}
 	}
 
@@ -89,9 +110,9 @@ public class Server implements Runnable{
 		String[] split = msg.split(" ");
 		String[] args = new String[split.length - 1];
 		System.arraycopy(split, 1, args, 0, split.length - 1);
-		String cmd = split[0];
+        String cmd = split[0].substring(1);
 
-		switch(cmd){
+        switch(cmd){
 			case "help":
 				this.help();
 				break;
@@ -107,17 +128,9 @@ public class Server implements Runnable{
 		String[] split = msg.split(" ");
 		String[] args = new String[split.length - 1];
 		System.arraycopy(split, 1, args, 0, split.length - 1);
-		String cmd = split[0];
-		String argString = "";
-		for(String arg : args){
-			if(argString.equals("")){
-				argString = arg;
-			}else{
-				argString = " " + arg;
-			}
-		}
+        String cmd = split[0].substring(1);
 
-		if(this.consoleCommands.containsKey(cmd)){
+        if(this.consoleCommands.containsKey(cmd)){
 			int[] pArgCount = this.consoleCommands.get(cmd);
 			for(int arg : pArgCount){
 				if(arg == args.length){
@@ -126,5 +139,8 @@ public class Server implements Runnable{
 			}
 		}
 		return false;
-	}
+    }
+
+    public void removeClient(ClientHandler clientHandler) {
+    }
 }

@@ -6,4 +6,5 @@
 *.ear
 
 # IntelliJ Project #
-.idea
+/.idea
+.idea/
