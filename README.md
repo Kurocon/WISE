@@ -1,7 +1,7 @@
 WISE
 ====
 
-WISE - the Whatsapp Interface for Security Exceptions
+WISE - the Whatsapp Interface for Security over Ethernet
 
 What is WISE?
 =============
